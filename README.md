@@ -1,25 +1,30 @@
 # lein-misaki
 
-A Leiningen plugin to do many wonderful things.
+A [Leiningen](https://github.com/technomancy/leiningen) plugin for [Misaki](https://github.com/liquidz/misaki), a [Jekyll](https://github.com/mojombo/jekyll) inspired static site generator
 
 ## Usage
 
-FIXME: Use this for user-level plugins:
+Create a `mysite` folder and put a `_config.clj` file in it. Read the
+[sample](https://github.com/liquidz/misaki/blob/master/samples/blog/_config.clj)
+to see all the available options.
 
 Put `[lein-misaki "0.1.0-SNAPSHOT"]` into the `:plugins` vector of your
 `:user` profile, or if you are on Leiningen 1.x do `lein plugin install
 lein-misaki 0.1.0-SNAPSHOT`.
 
-FIXME: Use this for project-level plugins:
-
-Put `[lein-misaki "0.1.0-SNAPSHOT"]` into the `:plugins` vector of your project.clj.
-
-FIXME: and add an example usage that actually makes sense:
+You can launch with
 
     $ lein misaki
 
+to compile the static site resources and serve it with an embedded
+Jetty, or
+
+    $ lein misaki --compile
+
+to only compile the static site.
+
 ## License
 
-Copyright © 2012 FIXME
+Copyright © 2012 Carlo Sciolla
 
 Distributed under the Eclipse Public License, the same as Clojure.
