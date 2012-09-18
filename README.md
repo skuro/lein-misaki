@@ -4,7 +4,13 @@ A [Leiningen](https://github.com/technomancy/leiningen) plugin for [Misaki](http
 
 ## Usage
 
-Create a `mysite` folder and put a `_config.clj` file in it. Read the
+Create a `mysite` folder and put a `_config.clj` file in it. The
+minimal configuration is an empty clojure map, i.e. `{}`
+
+Read the
+Misaki
+[default structure](https://github.com/liquidz/misaki/wiki/Directory-Structure)
+to learn how to lay down your site sources, or peek at the 
 [sample](https://github.com/liquidz/misaki/blob/master/samples/blog/_config.clj)
 to see all the available options.
 
