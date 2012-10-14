@@ -7,6 +7,6 @@
       .getCanonicalPath))
 
 (defn ^:no-project-needed misaki
-  "I don't do a lot."
+  "Compiles your Misaki sources and starts a local server"
   [project & args]
   (apply -main (get-current-directory) args))
