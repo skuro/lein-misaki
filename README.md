@@ -10,7 +10,7 @@ minimal configuration is an empty clojure map, i.e. `{}`
 Read the
 Misaki
 [default structure](https://github.com/liquidz/misaki/wiki/Directory-Structure)
-to learn how to lay down your site sources, or peek at the 
+to learn how to lay down your site sources, or peek at the
 [sample](https://github.com/liquidz/misaki/blob/master/samples/blog/_config.clj)
 to see all the available options.
 
@@ -28,6 +28,17 @@ Jetty, or
     $ lein misaki --compile
 
 to only compile the static site.
+
+## Custom misaki plugins
+
+When using `lein-misaki` you don't have an active leiningen project to refer to. As such,
+you need a way to include compiler plugins in the current classpath. With `lein-misaki` you
+can specify the following entry in yout `profiles.clj` to load custom plugins into the classpath:
+
+    {
+      ...
+      :misaki-dependencies [[misaki-clostache "0.0.1-alpha"]]
+    }
 
 ## License
 
