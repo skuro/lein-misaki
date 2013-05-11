@@ -1,4 +1,4 @@
-(defproject lein-misaki "0.1.2"
+(defproject lein-misaki "0.1.3-SNAPSHOT"
   :description "A Leiningen plugin for the Misaki static sites generator"
   :url "https://github.com/skuro/lein-misaki"
   :license {:name "Eclipse Public License"
