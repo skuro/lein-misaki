@@ -8,5 +8,6 @@
                  [clj-text-decoration "0.0.1"]
                  [compojure "1.1.3"]
                  [clj-jgit "0.3.8"]
+                 [me.raynes/fs "1.4.4"]
                  [ring/ring-jetty-adapter "1.1.0"]]
   :eval-in-leiningen true)

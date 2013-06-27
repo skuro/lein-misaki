@@ -1,4 +1,5 @@
-(ns leiningen.misaki.github.pages)
+(ns leiningen.misaki.github.pages
+  (:require [me.raynes.fs :as fs]))
 
 (def default-branch "gh-pages")
 
@@ -6,13 +7,88 @@
   "Checks whether the given branch exists in the current git repository"
   [branch])
 
+(defn mktemp
+  "Creates a temporary folder name"
+  []
+  (fs/temp-name "misaki"))
+
+(defmacro with-temp
+  "Executes the body making sure the temporary directory is removed at the end"
+  [& body]
+  (let [tmpname (mktemp)
+        tmppath (.getPath (fs/file (fs/tmpdir) tmpname))]
+    `(try
+       (let [~'tmpdir (fs/mkdir ~tmppath)]
+         ~@body)
+       (finally
+         (fs/delete-dir ~tmppath)))))
+
+(defn pubdir
+  "Returns a file handle of the directory containing the public files"
+  []
+  (throw (UnsupportedOperationException. "Not implemented yet")))
+
+(defn copy-files
+  "Copy the content of the 'from' direcory to 'to'. Both directories must exist."
+  [from to]
+  (when (and (fs/exists? from)
+             (fs/exists? to))
+    (if (or (fs/file? from)
+            (fs/file? to))
+      (throw (IllegalArgumentException. (str to " is a file")))
+      (let [from (fs/file from)
+            to (fs/file to)
+            trim-size (-> from str count inc)
+            dest #(fs/file to (subs (str %) trim-size))]
+        (dorun
+         (fs/walk (fn [root dirs files]
+                 (doseq [dir dirs]
+                   (when-not (fs/directory? dir)
+                     (-> root (fs/file dir) dest fs/mkdirs)))
+                 (doseq [f files]
+                   (fs/copy+ (fs/file root f) (dest (fs/file root f)))))
+               from))
+        to))))
+
+(defn park
+  "Copies the full content of the source dir into the dest dir"
+  [from to]
+  (copy-files from to))
+
+(defn checkout
+  "Checks out the configured git branch"
+  []
+  (throw (UnsupportedOperationException. "Not yet implemented")))
+
+(defn restore
+  "Restores the parked data into the current folder"
+  [tmpdir]
+  (copy-files tmpdir fs/*cwd*))
+
+(defn commit
+  "Adds and commits all the new content into the current branch"
+  []
+  (throw (UnsupportedOperationException. "Not yet implemented")))
+
+(defn current-branch
+  "Gets the current branch name"
+  []
+  (throw (UnsupportedOperationException. "Not yet implemented")))
+
+(defn create
+  "Creates a new branch"
+  [branch]
+  (throw (UnsupportedOperationException. "Not yet implemented")))
+
 (defn copy-to [branch]
-  (let [tmpdir (mktemp)
-        public (pubdir)]
-    (park pubdir temp)
-    (checkout branch)
-    (restore temp)
-    (commit)))
+  (with-temp
+   (let [public (pubdir)
+         branch-orig (current-branch)]
+     (park pubdir tmpdir)
+     (checkout branch)
+     (restore tmpdir)
+     (commit)
+     (checkout branch-orig))))
 
 (defn update-pages
   ([] (update-pages "gh-pages"))
