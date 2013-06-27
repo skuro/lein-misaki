@@ -79,9 +79,10 @@
   []
   (let [status (git/git-status *git-repo*)
         files  (reduce into #{} [(:untracked status)
-                                 (:modified  status)
-                                 (:changed   status)])]
-    (doseq)))
+                                 (:modified  status)])]
+    (doseq [file files]
+      (git/git-add *git-repo* file))
+    (git/git-commit *git-repo* "[lein-misaki] updates committed")))
 
 (defn current-branch
   "Gets the current branch name"
