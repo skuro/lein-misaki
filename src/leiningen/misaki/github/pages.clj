@@ -26,7 +26,8 @@
   (let [tmpname (mktemp)
         tmppath (.getPath (fs/file (fs/tmpdir) tmpname))]
     `(try
-       (let [~'tmpdir (fs/mkdir ~tmppath)]
+       (let [~'tmppath ~tmppath
+             ~'tmpdir (fs/mkdir ~tmppath)]
          ~@body)
        (finally
          (fs/delete-dir ~tmppath)))))
@@ -80,9 +81,12 @@
   (let [status (git/git-status *git-repo*)
         files  (reduce into #{} [(:untracked status)
                                  (:modified  status)])]
-    (doseq [file files]
-      (git/git-add *git-repo* file))
-    (git/git-commit *git-repo* "[lein-misaki] updates committed")))
+    (if (seq files)
+      (doseq [file files]
+        (println "Adding to the git index: " file)
+        (git/git-add *git-repo* file))
+      (git/git-commit *git-repo* "[lein-misaki] updates committed")
+      (println "Committed."))))
 
 (defn current-branch
   "Gets the current branch name"
@@ -98,16 +102,17 @@
   (with-temp
    (let [public (pubdir)
          branch-orig (current-branch)]
-     (park pubdir tmpdir)
-     (checkout branch)
-     (restore tmpdir)
-     (commit)
-     (checkout branch-orig))))
+     (park public tmpdir)
+     (try
+       (checkout branch)
+       (restore tmppath)
+       (commit)
+       (finally (checkout branch-orig))))))
 
 (defn update
   ([] (update "gh-pages"))
   ([branch]
-     (binding [*git-repo* (load-repo (.getPath fs/*cwd*))]
+     (binding [*git-repo* (git/load-repo (.getPath fs/*cwd*))]
       (if (exists? branch)
         (copy-to branch)
         (do
