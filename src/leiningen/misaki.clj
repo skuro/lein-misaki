@@ -36,15 +36,6 @@
   (add-dependencies :coordinates deps
                     :repositories {"clojars" "http://clojars.org/repo"}))
 
-(defn commit
-  "Commits the produced static site into the configured Git branch (gh-pages by default)"
-  []
-  #_([]
-     (commit "gh-pages"))
-  #_([git-branch]
-     (let [public-dir (get-public-dir)]
-       (git/commit public-dir git-branch))))
-
 (defn ^:no-project-needed misaki
   "Compiles your Misaki sources and starts a local server"
   [project & args]
@@ -53,5 +44,5 @@
   (case (first args)
     "new" (apply misaki-new (rest args))
     "listen" (apply github/listen (rest args))
-    "commit" (apply commit (rest args))
+    "update-pages" (apply pages/update (rest args))
     (apply -main (get-current-directory) args)))

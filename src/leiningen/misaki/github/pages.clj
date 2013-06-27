@@ -1,11 +1,19 @@
 (ns leiningen.misaki.github.pages
-  (:require [me.raynes.fs :as fs]))
+  (:require [me.raynes.fs :as fs]
+            [clj-jgit.porcelain :as git]
+            [misaki.config :as cfg]))
 
 (def default-branch "gh-pages")
 
+(declare ^:dynamic *git-repo*)
+
 (defn exists?
   "Checks whether the given branch exists in the current git repository"
-  [branch])
+  [branch]
+  (->> (git/git-branch-list *git-repo*)
+       (map #(.getName %))
+       (filter #{(str "refs/heads/" branch)})
+       seq))
 
 (defn mktemp
   "Creates a temporary folder name"
@@ -24,12 +32,13 @@
          (fs/delete-dir ~tmppath)))))
 
 (defn pubdir
-  "Returns a file handle of the directory containing the public files"
+  "Returns a file path of the directory containing the public files"
   []
-  (throw (UnsupportedOperationException. "Not implemented yet")))
+  (cfg/with-config
+    (cfg/public-path "")))
 
 (defn copy-files
-  "Copy the content of the 'from' direcory to 'to'. Both directories must exist."
+  "Copy the content of the 'from' directory to 'to'. Both directories must exist."
   [from to]
   (when (and (fs/exists? from)
              (fs/exists? to))
@@ -73,7 +82,7 @@
 (defn current-branch
   "Gets the current branch name"
   []
-  (throw (UnsupportedOperationException. "Not yet implemented")))
+  (git/git-branch-current *git-repo*))
 
 (defn create
   "Creates a new branch"
@@ -90,11 +99,12 @@
      (commit)
      (checkout branch-orig))))
 
-(defn update-pages
-  ([] (update-pages "gh-pages"))
+(defn update
+  ([] (update "gh-pages"))
   ([branch]
-     (if (exists? branch)
-       (copy-to branch)
-       (do
-         (create branch)
-         (copy-to branch)))))
+     (binding [*git-repo* (load-repo (.getPath fs/*cwd*))]
+      (if (exists? branch)
+        (copy-to branch)
+        (do
+          (create branch)
+          (copy-to branch))))))
