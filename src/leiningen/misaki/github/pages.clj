@@ -65,9 +65,9 @@
   (copy-files from to))
 
 (defn checkout
-  "Checks out the configured git branch"
-  []
-  (throw (UnsupportedOperationException. "Not yet implemented")))
+  "Checks out the provided git branch"
+  [branch]
+  (git/git-checkout *git-repo* branch))
 
 (defn restore
   "Restores the parked data into the current folder"
@@ -77,7 +77,11 @@
 (defn commit
   "Adds and commits all the new content into the current branch"
   []
-  (throw (UnsupportedOperationException. "Not yet implemented")))
+  (let [status (git/git-status *git-repo*)
+        files  (reduce into #{} [(:untracked status)
+                                 (:modified  status)
+                                 (:changed   status)])]
+    (doseq)))
 
 (defn current-branch
   "Gets the current branch name"
@@ -87,7 +91,7 @@
 (defn create
   "Creates a new branch"
   [branch]
-  (throw (UnsupportedOperationException. "Not yet implemented")))
+  (git/git-branch-create *git-repo* branch))
 
 (defn copy-to [branch]
   (with-temp
