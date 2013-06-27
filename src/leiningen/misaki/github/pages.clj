@@ -35,8 +35,8 @@
 (defn pubdir
   "Returns a file path of the directory containing the public files"
   []
-  (cfg/with-config
-    (cfg/public-path "")))
+  (str fs/*cwd* (cfg/with-config
+                  (cfg/public-path ""))))
 
 (defn copy-files
   "Copy the content of the 'from' directory to 'to'. Both directories must exist."
@@ -52,12 +52,12 @@
             dest #(fs/file to (subs (str %) trim-size))]
         (dorun
          (fs/walk (fn [root dirs files]
-                 (doseq [dir dirs]
-                   (when-not (fs/directory? dir)
-                     (-> root (fs/file dir) dest fs/mkdirs)))
-                 (doseq [f files]
-                   (fs/copy+ (fs/file root f) (dest (fs/file root f)))))
-               from))
+                    (doseq [dir dirs]
+                      (when-not (fs/directory? dir)
+                        (-> root (fs/file dir) dest fs/mkdirs)))
+                    (doseq [f files]
+                      (fs/copy+ (fs/file root f) (dest (fs/file root f)))))
+                  from))
         to))))
 
 (defn park
@@ -68,7 +68,7 @@
 (defn checkout
   "Checks out the provided git branch"
   [branch]
-  (git/git-checkout *git-repo* branch))
+  (git/git-checkout *git-repo* branch false true)) ; force checkout
 
 (defn restore
   "Restores the parked data into the current folder"
@@ -81,7 +81,7 @@
   (let [status (git/git-status *git-repo*)
         files  (reduce into #{} [(:untracked status)
                                  (:modified  status)])]
-    (if (seq files)
+    (when (seq files)
       (doseq [file files]
         (println "Adding to the git index: " file)
         (git/git-add *git-repo* file))
@@ -98,16 +98,27 @@
   [branch]
   (git/git-branch-create *git-repo* branch))
 
+(defn cleanup
+  "Removes uncommitted files from the current git tree"
+  []
+  (let [cleanup-fn (fn [path]
+                     (println "Cleaning up: " path)
+                     (fs/delete path))]
+    (doall (map cleanup-fn (:untracked (git/git-status *git-repo*))))))
+
 (defn copy-to [branch]
   (with-temp
    (let [public (pubdir)
          branch-orig (current-branch)]
-     (park public tmpdir)
+     (park public tmppath)
      (try
+       (cleanup)
        (checkout branch)
        (restore tmppath)
        (commit)
-       (finally (checkout branch-orig))))))
+       (finally
+         (checkout branch-orig)
+         (restore public))))))
 
 (defn update
   ([] (update "gh-pages"))
