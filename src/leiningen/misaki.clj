@@ -39,7 +39,7 @@
 (defn ^:no-project-needed misaki
   "Compiles your Misaki sources and starts a local server"
   [project & args]
-  (if-let [deps (:misaki-dependencies project)]
+  (when-let [deps (:misaki-dependencies project)]
     (load-misaki-deps deps))
   (case (first args)
     "new" (apply misaki-new (rest args))
