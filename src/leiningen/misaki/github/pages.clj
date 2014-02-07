@@ -85,8 +85,8 @@
       (doseq [file files]
         (println "Adding to the git index: " file)
         (git/git-add *git-repo* file))
-      (git/git-commit *git-repo* "[lein-misaki] updates committed")
-      (println "Committed."))))
+      (do (git/git-commit *git-repo* "[lein-misaki] updates committed")
+          (println "Committed.")))))
 
 (defn current-branch
   "Gets the current branch name"
