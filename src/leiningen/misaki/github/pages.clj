@@ -26,8 +26,8 @@
   (let [tmpname (mktemp)
         tmppath (.getPath (fs/file (fs/tmpdir) tmpname))]
     `(try
-       (let [~'tmppath ~tmppath
-             ~'tmpdir (fs/mkdir ~tmppath)]
+       (let [~'tmpdir ~tmppath
+             ~'_      (fs/mkdir ~tmppath)]
          ~@body)
        (finally
          (fs/delete-dir ~tmppath)))))
@@ -43,6 +43,7 @@
   [from to]
   (when (and (fs/exists? from)
              (fs/exists? to))
+    (println "Both " from " and " to " exist")
     (if (or (fs/file? from)
             (fs/file? to))
       (throw (IllegalArgumentException. (str to " is a file")))
@@ -50,19 +51,27 @@
             to (fs/file to)
             trim-size (-> from str count inc)
             dest #(fs/file to (subs (str %) trim-size))]
+        (println "from: " from)
+        (println "to  : " to)
+        (println "trim: " trim-size)
+        (println "dest: " dest)
         (dorun
-         (fs/walk (fn [root dirs files]
-                 (doseq [dir dirs]
-                   (when-not (fs/directory? dir)
-                     (-> root (fs/file dir) dest fs/mkdirs)))
-                 (doseq [f files]
-                   (fs/copy+ (fs/file root f) (dest (fs/file root f)))))
-               from))
+         (fs/walk
+          (fn [root dirs files]
+            (println "walking through " files)
+            (doseq [dir dirs]
+              (when-not (fs/directory? dir)
+                (-> root (fs/file dir) dest fs/mkdirs)))
+            (doseq [f files]
+              (println "Copying " f)
+              (fs/copy+ (fs/file root f) (dest (fs/file root f)))))
+          from))
         to))))
 
 (defn park
   "Copies the full content of the source dir into the dest dir"
   [from to]
+  (println "Copying files from " from " to " to)
   (copy-files from to))
 
 (defn checkout
@@ -105,7 +114,7 @@
      (park public tmpdir)
      (try
        (checkout branch)
-       (restore tmppath)
+       (restore tmpdir)
        (commit)
        (finally (checkout branch-orig))))))
 
@@ -113,8 +122,6 @@
   ([] (update "gh-pages"))
   ([branch]
      (binding [*git-repo* (git/load-repo (.getPath fs/*cwd*))]
-      (if (exists? branch)
-        (copy-to branch)
-        (do
-          (create branch)
-          (copy-to branch))))))
+       (if (not (exists? branch))
+         (create branch))
+       (copy-to branch))))
