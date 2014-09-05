@@ -14,9 +14,9 @@ to learn how to lay down your site sources, or peek at the
 [sample](https://github.com/liquidz/misaki/blob/master/samples/blog/_config.clj)
 to see all the available options.
 
-Put `[lein-misaki "0.1.0-SNAPSHOT"]` into the `:plugins` vector of your
+Put `[lein-misaki "0.1.5-SNAPSHOT"]` into the `:plugins` vector of your
 `:user` profile, or if you are on Leiningen 1.x do `lein plugin install
-lein-misaki 0.1.0-SNAPSHOT`.
+lein-misaki 0.1.5-SNAPSHOT`.
 
 You can launch with
 
